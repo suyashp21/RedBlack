@@ -13,7 +13,11 @@ struct node {
 
 void add(node* n1, node* n);
 node* search(node* n, int k);
-  
+void print(node* n, int k);
+void fix(node* root, node* n);
+node* sibling(node* root, node* n);
+node* uncle(node* root, node* n);
+
 int main() {
   node* root = NULL;
   char action[10];
@@ -34,6 +38,7 @@ int main() {
       }
       else {
 	add(root, n);
+	fix(root, n);
       }
     }
     else if (strcmp(action, "FILE") == 0 || strcmp(action, "file") == 0) {
@@ -51,6 +56,7 @@ int main() {
       // will be added in second part of red-black tree
     }
     else if (strcmp(action, "PRINT") == 0 || strcmp(action, "print") == 0) {
+      print(root, 0);
     }
     else if (strcmp(action, "QUIT") == 0 || strcmp(action, "quit") == 0) {
       break;
@@ -98,5 +104,88 @@ node* search(node* n, int k) {
 
   else {
     return search(n->right, k); // switch back to right
+  }
+}
+
+void print(node* n, int k) {
+  if (n == NULL) {
+    // do nothing
+  }
+  else {
+    print(n->right, k+1);
+
+    for (int i=0; i<k; i++) {
+      cout << "\t";
+    }
+    cout << n->data;
+    if (n->color == 0) {
+      cout << "(R)" << endl;
+    }
+    if (n->color == 1) {
+      cout << "(B)" << endl;
+    }
+    print(n->left, k+1);
+  }
+}
+
+void fix(node* root, node* n) {
+  // adjust the tree according to the red-black tree rules
+  if (n == root) {
+    n->color = 1;
+  }
+  else if (n->parent->color == 1) {
+    // do nothing
+  }
+  else if (uncle(root, n) != NULL && uncle(root, n)->color == 0) {
+    n->parent->color = 1;
+    n->parent->parent->color = 0;
+    uncle(root, n)->color = 1;
+    fix(root, n->parent->parent);
+  }
+  else if (n->parent->parent->left != NULL && n->parent->parent->left->right == n) {
+    node* p = n->parent;
+    node* g = n->parent->parent;
+    g->left = n;
+    n->parent = g;
+    p->right = n->left;
+    if (n->left != NULL) {n->left->parent = p;}
+    n->left = p;
+    p->parent = n;
+    cout << p->data << ", " << p->parent->data << endl;
+    fix(root, p);
+  }
+  else if (n->parent->parent->right != NULL && n->parent->parent->right->left == n) {
+    node* p = n->parent;
+    node* g = n->parent->parent;
+    g->right = n;
+    n->parent = g;
+    p->left = n->right;
+    if (n->right != NULL) {n->right->parent = p;}
+    n->right = p;
+    p->parent = n;
+    fix(root, p);
+  }
+}
+
+node* sibling(node* root, node* n) {
+  if (n == root) {
+    return NULL;
+  }
+  else {
+    if (n->parent->left == n) {
+      return n->parent->right;
+    }
+    else {
+      return n->parent->left;
+    }
+  }
+}
+
+node* uncle(node* root, node* n) {
+  if (n == root) {
+    return NULL;
+  }
+  else {
+    return sibling(root, n->parent);
   }
 }
