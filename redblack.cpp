@@ -33,12 +33,15 @@ int main() {
       n->right = NULL;
       n->color = 0;
       if (root == NULL) {
-	n->color = 1;
 	root = n;
+	n->color = 1;
       }
       else {
 	add(root, n);
 	fix(root, n);
+      }
+      while (root->parent != NULL) {
+	root = root->parent;
       }
     }
     else if (strcmp(action, "FILE") == 0 || strcmp(action, "file") == 0) {
@@ -137,12 +140,14 @@ void fix(node* root, node* n) {
     // do nothing
   }
   else if (uncle(root, n) != NULL && uncle(root, n)->color == 0) {
+    // cout << "A" << endl;
     n->parent->color = 1;
     n->parent->parent->color = 0;
     uncle(root, n)->color = 1;
     fix(root, n->parent->parent);
   }
   else if (n->parent->parent->left != NULL && n->parent->parent->left->right == n) {
+    // cout << "B" << endl;
     node* p = n->parent;
     node* g = n->parent->parent;
     g->left = n;
@@ -151,10 +156,12 @@ void fix(node* root, node* n) {
     if (n->left != NULL) {n->left->parent = p;}
     n->left = p;
     p->parent = n;
-    cout << p->data << ", " << p->parent->data << endl;
+    // cout << p->data << ", " << p->parent->data << endl;
+    print(root, 0);
     fix(root, p);
   }
   else if (n->parent->parent->right != NULL && n->parent->parent->right->left == n) {
+    // cout << "C" << endl;
     node* p = n->parent;
     node* g = n->parent->parent;
     g->right = n;
@@ -164,6 +171,63 @@ void fix(node* root, node* n) {
     n->right = p;
     p->parent = n;
     fix(root, p);
+  }
+  else if ((uncle(root, n) == NULL || uncle(root, n)->color == 1) && n->parent->parent->left != NULL && n->parent->parent->left->left == n) {
+    // cout << "D" << endl;
+    if (n->parent->parent == root) {
+      node* p = n->parent;
+      node* g = p->parent;
+      p->parent = g->parent;
+      g->left = p->right;
+      g->parent = p;
+      p->right = g;
+      if (g->left != NULL) {g->left->parent = g;}
+      p->color = 1;
+      g->color = 0;
+      // root = p;
+    }
+    else {
+      node* p = n->parent;
+      node* g = p->parent;
+      p->parent = g->parent;
+      if (g->parent->right == g) {g->parent->right = p;}
+      else if (g->parent->left == g) {g->parent->left = p;}
+      g->left = p->right;
+      g->parent = p;
+      p->right = g;
+      if (g->left != NULL) {g->left->parent = g;}
+      p->color = 1;
+      g->color = 0;
+    }
+  }
+  else if ((uncle(root, n) == NULL || uncle(root, n)->color == 1) && n->parent->parent->right != NULL && n->parent->parent->right->right == n) {
+    // cout << "E" << endl;
+    if (n->parent->parent == root) {
+      node* p = n->parent;
+      node* g = p->parent;
+      p->parent = g->parent;
+      g->right = p->left;
+      g->parent = p;
+      p->left = g;
+      if (g->right != NULL) {g->right->parent = g;}
+      p->color = 1;
+      g->color = 0;
+      // root = p;
+    }
+    else {
+      node* p = n->parent;
+      node* g = p->parent;
+      p->parent = g->parent;
+      if (g->parent->right == g) {g->parent->right = p;}
+      else if (g->parent->left == g) {g->parent->left = p;}
+      g->right = p->left;
+      g->parent = p;
+      p->left = g;
+      if (g->right != NULL) {g->right->parent = g;}
+      p->color = 1;
+      g->color = 0;
+    }
+
   }
 }
 
