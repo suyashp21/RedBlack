@@ -1,5 +1,10 @@
+/* Author: Suyash Pandit
+Date: May 5, 2022
+This is the first part of Red Black Tree, with insertion implemented */
+
 #include <iostream>
 #include <cstring>
+#include <fstream>
 
 using namespace std;
 
@@ -45,6 +50,30 @@ int main() {
       }
     }
     else if (strcmp(action, "FILE") == 0 || strcmp(action, "file") == 0) {
+      // read in from file
+      ifstream myfile ("Numbers.txt");
+      for (int i=1; i<=11; i++) {
+	int k;
+	myfile >> k;
+	cout << k << endl;
+	node* n = new node();
+	n->data = k;
+	n->parent = NULL;
+	n->left = NULL;
+	n->right = NULL;
+	if (root == NULL) {
+	  root = n;
+	  n->color = 1;
+	}
+	else {
+	  add(root, n);
+	  fix(root, n);
+	}
+	while (root->parent != NULL) {
+	  root = root->parent;
+	}
+	// print(root, 0);
+      }
     }
     else if (strcmp(action, "SEARCH") == 0 || strcmp(action, "search") == 0) {
       cout << "What do you want to search for? "; cin >> input;
