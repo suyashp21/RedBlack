@@ -1,3 +1,7 @@
+/* Author: Suyash Pandit
+Date: May 5, 2022
+This is the first part of Red Black Tree, with insertion implemented */
+
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -16,7 +20,6 @@ void add(node* n1, node* n);
 node* search(node* n, int k);
 void print(node* n, int k);
 void fix(node* root, node* n);
-void remove(node* root, node* n);
 node* sibling(node* root, node* n);
 node* uncle(node* root, node* n);
 
@@ -82,15 +85,7 @@ int main() {
       }
     }
     else if (strcmp(action, "DELETE") == 0 || strcmp(action, "delete") == 0) {
-      cout << "Enter the number to delete: "; cin >> input;
-      node* n = search(root, input);
-      if (n == NULL) {
-	cout << "That number isn't in the tree" << endl;
-      }
-      else {
-	// maybe add confirmation message?
-	remove(root, n);
-      }
+      // will be added in second part of red-black tree
     }
     else if (strcmp(action, "PRINT") == 0 || strcmp(action, "print") == 0) {
       print(root, 0);
@@ -262,71 +257,6 @@ void fix(node* root, node* n) {
       g->color = 0;
     }
 
-  }
-}
-
-void remove(node* root, node* n) {
-  // cout << n->data << " " << n->parent->data << endl;
-  if (n->left != NULL && n->right != NULL) {
-    node* n1 = n->left;
-    while (n1->right != NULL) {
-      n1 = n1->right;
-    }
-    n->data = n1->data;
-    remove(root, n1);
-  }
-  else if (n->left != NULL && n->right == NULL) {
-    // cout << "This case." << endl;
-    if (n == root) {
-    }
-    else {
-      if (n->color == 0) {
-	if (n->parent->left == n) {n->parent->left = n->left; n->left->parent = n->parent;}
-	else if (n->parent->right == n) {n->parent->right = n->left; n->right->parent = n->parent;}
-	delete n;
-      }
-      else if (n->color == 1 && n->left->color == 0) {
-	// cout << "This subcase." << endl;
-        if (n->parent->left == n) {n->parent->left = n->left; n->left->parent = n->parent;}
-        else if (n->parent->right == n) {n->parent->right = n->left; n->right->parent = n->parent;}
-	n->left->color = 1;
-        delete n;
-      }
-      else {
-      }
-    }
-  }
-  else if (n->left == NULL && n->right != NULL) {
-    if (n == root) {
-    }
-    else {
-      if (n->color == 0) {
-	if (n->parent->left == n) {n->parent->left = n->right; n->right->parent = n->parent;}
-	else if (n->parent->right == n) {n->parent->right = n->right; n->right->parent = n->parent;}
-	delete n;
-      }
-      else if (n->color == 1 && n->right->color == 0) {
-        if (n->parent->left == n) {n->parent->left = n->right; n->right->parent = n->parent;}
-        else if (n->parent->right == n) {n->parent->right = n->right; n->right->parent = n->parent;}
-	n->right->color = 1;
-        delete n;
-      }
-      else {
-      }
-    }
-  }
-  else if (n->left == NULL && n->right == NULL) {
-    if (n == root) {
-    }
-    else {
-      if (n->color == 0) {
-	if (n->parent->left == n) {n->parent->left = NULL;}
-	else if (n->parent->right == n) {n->parent->right = NULL;}
-	delete n;
-      }
-      else if (n->color == 1) {
-      }
-    }
   }
 }
 
