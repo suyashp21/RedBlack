@@ -19,6 +19,7 @@ void fix(node* root, node* n);
 void remove(node* root, node* n);
 node* sibling(node* root, node* n);
 node* uncle(node* root, node* n);
+void deletefix(node* root, node* n);
 
 int main() {
   node* root = NULL;
@@ -191,7 +192,6 @@ void fix(node* root, node* n) {
     n->left = p;
     p->parent = n;
     // cout << p->data << ", " << p->parent->data << endl;
-    print(root, 0);
     fix(root, p);
   }
   else if (n->parent->parent->right != NULL && n->parent->parent->right->left == n) {
@@ -266,7 +266,7 @@ void fix(node* root, node* n) {
 }
 
 void remove(node* root, node* n) {
-  // cout << n->data << " " << n->parent->data << endl;
+  cout << n->data << " " << n->parent->data << endl; // debugging
   if (n->left != NULL && n->right != NULL) {
     node* n1 = n->left;
     while (n1->right != NULL) {
@@ -288,11 +288,15 @@ void remove(node* root, node* n) {
       else if (n->color == 1 && n->left->color == 0) {
 	// cout << "This subcase." << endl;
         if (n->parent->left == n) {n->parent->left = n->left; n->left->parent = n->parent;}
-        else if (n->parent->right == n) {n->parent->right = n->left; n->right->parent = n->parent;}
+        else if (n->parent->right == n) {n->parent->right = n->left; n->left->parent = n->parent;}
 	n->left->color = 1;
         delete n;
       }
       else {
+	if (n->parent->left == n) {n->parent->left = n->left; n->left->parent = n->parent;}
+	else if (n->parent->right == n) {n->parent->right = n->left; n->left->parent = n->parent;}
+	deletefix(root, n->left);
+	delete n;
       }
     }
   }
@@ -312,6 +316,10 @@ void remove(node* root, node* n) {
         delete n;
       }
       else {
+	if (n->parent->left == n) {n->parent->left = n->right; n->right->parent = n->parent;}
+	else if (n->parent->right == n) {n->parent->right = n->right; n->right->parent = n->parent;}
+	deletefix(root, n->right);
+	delete n;
       }
     }
   }
@@ -351,4 +359,58 @@ node* uncle(node* root, node* n) {
   else {
     return sibling(root, n->parent);
   }
+}
+
+void deletefix(node* root, node* n) {
+  if (n != NULL && n->color == 0) {
+    // do nothing
+  }
+  // Case 1
+  else if (n == root) {
+    // n is root, do nothing
+  }
+  // Case 2
+  else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 0) {
+    node* p = n->parent;
+    node* s = sibling(root, n);
+    if (p->left == n) {
+      s->parent = p->parent;
+      if (p->parent != NULL) {
+	if (p->parent->left == p) {p->parent->left = s;}
+	else if (p->parent->right == p) {p->parent->right = s;}
+      }
+      p->parent = s;
+      s->left = p;
+      p->right = s->left;
+      if (p->right != NULL) {p->right->parent = p;}
+      p->color = 0;
+      s->color = 1;
+      // fix(root, n)
+    }
+    else if (p->right == n) {
+      s->parent = p->parent;
+      if (p->parent != NULL) {
+        if (p->parent->left == p) {p->parent->left = s;}
+        else if (p->parent->right == p) {p->parent->right = s;}
+      }
+      p->parent = s;
+      s->right = p;
+      p->left = s->right;
+      if (p->left != NULL) {p->left->parent = p;}
+      p->color = 0;
+      s->color = 1;
+      // fix(root, n)
+    }
+  }
+  // Case 3
+  else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 1 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color == 1) && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) {
+    sibling(root, n)->color = 0;
+    fix(root, n->parent);
+  }
+  // Case 4
+  else if (sibling(root, n) != NULL && n->parent->color == 0 && sibling(root, n)->color == 1 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color == 1) && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) {
+    sibling(root, n)->color = 0;
+    n->parent->color = 1;
+  }
+
 }
