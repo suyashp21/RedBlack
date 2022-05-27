@@ -91,6 +91,9 @@ int main() {
       else {
 	// maybe add confirmation message?
 	remove(root, n);
+	while (root->parent != NULL) {
+	  root = root->parent;
+	}
       }
     }
     else if (strcmp(action, "PRINT") == 0 || strcmp(action, "print") == 0) {
@@ -333,6 +336,10 @@ void remove(node* root, node* n) {
 	delete n;
       }
       else if (n->color == 1) {
+	deletefix(root, n);
+	if (n->parent->left == n) {n->parent->left = NULL;}
+	else if (n->parent->right == n) {n->parent->right = NULL;}
+	delete n;
       }
     }
   }
@@ -385,6 +392,12 @@ void deletefix(node* root, node* n) {
       if (p->right != NULL) {p->right->parent = p;}
       p->color = 0;
       s->color = 1;
+      if (p == root) {
+	deletefix(s, n);
+      }
+      else {
+	deletefix(root, n);
+      }
       // fix(root, n)
     }
     else if (p->right == n) {
@@ -399,18 +412,91 @@ void deletefix(node* root, node* n) {
       if (p->left != NULL) {p->left->parent = p;}
       p->color = 0;
       s->color = 1;
+      if (p == root) {
+	deletefix(s, n);
+      }
+      else {
+	deletefix(root, n);
+      }
       // fix(root, n)
     }
   }
   // Case 3
   else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 1 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color == 1) && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) {
     sibling(root, n)->color = 0;
-    fix(root, n->parent);
+    deletefix(root, n->parent);
   }
   // Case 4
   else if (sibling(root, n) != NULL && n->parent->color == 0 && sibling(root, n)->color == 1 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color == 1) && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) {
     sibling(root, n)->color = 0;
     n->parent->color = 1;
   }
-
+  // Case 5a
+  else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 1 && n->parent->left == n && sibling(root, n)->left != NULL && sibling(root, n)->left->color == 0 && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) {
+    node* p = n->parent;
+    node* s = sibling(root, n);
+    node* x = s->left;
+    p->right = x;
+    x->parent = p;
+    s->left = x->right;
+    if (x->right != NULL) {x->right->parent = s;}
+    x->right = s;
+    s->parent = x;
+    x->color = 1;
+    s->color = 0;
+    deletefix(root, n);
+  }
+  // Case 5b
+  else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 1 && n->parent->right == n && sibling(root, n)->right != NULL && sibling(root, n)->right->color == 0 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color==1)) {
+    node* p = n->parent;
+    node* s = sibling(root, n);
+    node* x = s->right;
+    p->left = x;
+    x->parent = p;
+    s->right = x->left;
+    if (x->left != NULL) {x->left->parent = s;}
+    x->left = s;
+    s->parent = x;
+    x->color = 1;
+    s->color = 0;
+    deletefix(root, n);
+  }
+  // Case 6a
+  else if (sibling(root, n) != NULL && sibling(root, n)->color == 1 && n->parent->left == n && sibling(root, n)->right != NULL && sibling(root, n)->right->color == 0) {
+    node* p = n->parent;
+    node* s = sibling(root, n);
+    node* x = s->left;
+    node* y = s->right;
+    s->parent = p->parent;
+    if (s->parent != NULL) {
+      if (s->parent->left == p) {s->parent->left = s;}
+      else if (s->parent->right == p) {s->parent->right = s;}
+    }
+    s->left = p;
+    p->parent = s;
+    p->right = x;
+    if (x != NULL) {x->parent = p;}
+    s->color = p->color;
+    p->color = 1;
+    y->color = 1;
+  }
+  // Case 6b
+  else if (sibling(root, n) != NULL && sibling(root, n)->color == 1 && n->parent->right == n && sibling(root, n)->left != NULL && sibling(root, n)->left->color == 0) {
+    node* p = n->parent;
+    node* s = sibling(root, n);
+    node* x = s->right;
+    node* y = s->left;
+    s->parent = p->parent;
+    if (s->parent != NULL) {
+      if (s->parent->left == p) {s->parent->left = s;}
+      else if (s->parent->right == p) {s->parent->right = s;}
+    }
+    s->right = p;
+    p->parent = s;
+    p->left = x;
+    if (x != NULL) {x->parent = p;}
+    s->color = p->color;
+    p->color = 1;
+    y->color = 1;
+  }
 }
