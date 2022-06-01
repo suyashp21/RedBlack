@@ -90,8 +90,28 @@ int main() {
       }
       else {
 	// maybe add confirmation message?
-	remove(root, n);
-	while (root->parent != NULL) {
+        if (n == root && (n->left == NULL || n->right == NULL)) {
+	  if (n->left == NULL && n->right == NULL) {
+	    root = NULL;
+	    delete n;
+	  }
+	  else if (n->left == NULL) {
+	    root = n->right;
+	    root->parent = NULL;
+	    root->color = 1;
+	    delete n;
+	  }
+	  else if (n->right == NULL) {
+	    root = n->left;
+	    root->parent = NULL;
+	    root->color = 1;
+	    delete n;
+	  }
+	}
+        else {
+	  remove(root, n);
+	}
+	while (root != NULL && root->parent != NULL) {
 	  root = root->parent;
 	}
       }
@@ -269,7 +289,7 @@ void fix(node* root, node* n) {
 }
 
 void remove(node* root, node* n) {
-  cout << n->data << " " << n->parent->data << endl; // debugging
+  // if (root != n) {cout << n->data << " " << n->parent->data << endl;} // debugging
   if (n->left != NULL && n->right != NULL) {
     node* n1 = n->left;
     while (n1->right != NULL) {
@@ -346,6 +366,7 @@ void remove(node* root, node* n) {
 }
 
 node* sibling(node* root, node* n) {
+  // returns the sibling of a node, if it exists
   if (n == root) {
     return NULL;
   }
@@ -360,6 +381,7 @@ node* sibling(node* root, node* n) {
 }
 
 node* uncle(node* root, node* n) {
+  // returns the uncle of a node, if it exists
   if (n == root) {
     return NULL;
   }
@@ -432,7 +454,7 @@ void deletefix(node* root, node* n) {
     n->parent->color = 1;
   }
   // Case 5a
-  else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 1 && n->parent->left == n && sibling(root, n)->left != NULL && sibling(root, n)->left->color == 0 && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) {
+  else if (sibling(root, n) != NULL && sibling(root, n)->color == 1 && n->parent->left == n && sibling(root, n)->left != NULL && sibling(root, n)->left->color == 0 && (sibling(root,n)->right == NULL || sibling(root,n)->right->color==1)) { // && n->parent->color == 1
     node* p = n->parent;
     node* s = sibling(root, n);
     node* x = s->left;
@@ -447,7 +469,7 @@ void deletefix(node* root, node* n) {
     deletefix(root, n);
   }
   // Case 5b
-  else if (sibling(root, n) != NULL && n->parent->color == 1 && sibling(root, n)->color == 1 && n->parent->right == n && sibling(root, n)->right != NULL && sibling(root, n)->right->color == 0 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color==1)) {
+  else if (sibling(root, n) != NULL && sibling(root, n)->color == 1 && n->parent->right == n && sibling(root, n)->right != NULL && sibling(root, n)->right->color == 0 && (sibling(root,n)->left == NULL || sibling(root,n)->left->color==1)) { // && n->parent->color == 1
     node* p = n->parent;
     node* s = sibling(root, n);
     node* x = s->right;
